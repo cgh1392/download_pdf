@@ -4,11 +4,19 @@ import urllib.request
 import shutil
 from multiprocessing import Pool
 import os
+import sys
 
-target = "ICCV2019"
+# TODO : workshop papers
+
+try : target = sys.argv[1]
+except : target = "ICCV2019" #change target if you want : ICCV{year} or CVPR{year}
+
+print('accessing cvf open access of '+target)
 A = requests.get(url="http://openaccess.thecvf.com/"+target+".py")
 soup = bs(A.text)
 L = soup.select("#content > dl")[0].findAll("dd")
+
+print(target+ ' paper list crawled')
 
 folder = target+"/"
 
@@ -18,6 +26,9 @@ except FileExistsError:
     # directory already exists
     pass
 
+name_list = [L[2 * i + 1].find("div", class_="bibref").text.split("title = {")[1].split("}")[0] for i in range(int(len(L)/2))]
+with open(folder+'_name_list.txt','w', encoding='utf-8') as f :
+    f.write("\n".join(name_list))
 
 def download(i):
     url = (
